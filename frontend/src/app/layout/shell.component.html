@@ -1,0 +1,44 @@
+<div class="app-shell" [class.menu-open]="menuOpen">
+  <header class="mobile-bar">
+    <button type="button" class="menu-toggle" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen" aria-label="Open menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <div class="mobile-brand">
+      <img src="/logo.jpg" alt="Shivohum Group" class="brand-logo mobile" />
+    </div>
+    @if (showQuickAdd) {
+      <a routerLink="/transactions/new" class="btn primary quick-add">+ Add</a>
+    }
+  </header>
+
+  <div class="backdrop" (click)="closeMenu()"></div>
+
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="/logo.jpg" alt="Shivohum Group" class="brand-logo" />
+      <small>Construction Tracker</small>
+    </div>
+
+    <nav>
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/transactions" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }">Transactions</a>
+      <a routerLink="/projects" routerLinkActive="active">Projects</a>
+      <a routerLink="/quotations" routerLinkActive="active">Quotations</a>
+      <a routerLink="/import" routerLinkActive="active">Import Excel</a>
+    </nav>
+
+    <div class="sidebar-user">
+      <div>
+        <strong>{{ auth.user()?.fullName }}</strong>
+        <small>{{ auth.user()?.role }}</small>
+      </div>
+      <button type="button" class="link-btn" (click)="auth.logout()">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="content">
+    <router-outlet />
+  </main>
+</div>

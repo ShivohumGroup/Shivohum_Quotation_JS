@@ -1,0 +1,84 @@
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Ledger</p>
+    <h1>Transactions</h1>
+    <p class="muted">{{ totalCount }} entries from all construction projects.</p>
+  </div>
+  <a routerLink="/transactions/new" class="btn primary hide-on-mobile">Add transaction</a>
+</section>
+
+<form class="filters card" [formGroup]="filters" (ngSubmit)="load(1)">
+  <label>From <input type="date" formControlName="from" /></label>
+  <label>To <input type="date" formControlName="to" /></label>
+  <label>
+    Project
+    <select formControlName="projectId">
+      <option value="">All projects</option>
+      @for (project of projects; track project.projectId) {
+        <option [value]="project.projectId">{{ project.projectName }}</option>
+      }
+    </select>
+  </label>
+  <label>
+    Type
+    <select formControlName="type">
+      <option value="">All</option>
+      <option value="Income">Income</option>
+      <option value="Expense">Expense</option>
+    </select>
+  </label>
+  <label>Search <input formControlName="search" placeholder="Labour, tea, client…" /></label>
+  <button class="btn primary" type="submit">Filter</button>
+</form>
+
+@if (error) {
+  <p class="error">{{ error }}</p>
+}
+
+<section class="card table-wrap">
+  <table class="stack-on-mobile">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Category</th>
+        <th>Description</th>
+        <th>Project</th>
+        <th>Mode</th>
+        <th class="num">Amount</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @if (loading) {
+        <tr><td class="muted skip-label" colspan="8">Loading…</td></tr>
+      } @else if (!rows.length) {
+        <tr><td class="muted skip-label" colspan="8">No transactions match these filters.</td></tr>
+      } @else {
+        @for (row of rows; track row.transactionId) {
+          <tr>
+            <td data-label="Date">{{ row.transactionDate | date:'dd-MM-yyyy' }}</td>
+            <td data-label="Type"><span class="pill" [class.income]="row.type === 'Income'" [class.expense]="row.type === 'Expense'">{{ row.type }}</span></td>
+            <td data-label="Category">{{ row.categoryName }}</td>
+            <td data-label="Description">{{ row.description }}</td>
+            <td data-label="Project">{{ row.projectName || '—' }}</td>
+            <td data-label="Mode">{{ row.paymentModeName }}</td>
+            <td class="num" data-label="Amount" [class.income-text]="row.type === 'Income'" [class.expense-text]="row.type === 'Expense'">
+              {{ row.amount | currency:'INR':'symbol':'1.2-2' }}
+            </td>
+            <td class="row-actions" data-label="Actions">
+              <a [routerLink]="['/transactions', row.transactionId, 'edit']">Edit</a>
+              <button type="button" class="link-btn danger" (click)="remove(row)">Delete</button>
+            </td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</section>
+
+<div class="pager">
+  <button class="btn" type="button" [disabled]="page <= 1" (click)="load(page - 1)">Previous</button>
+  <span>Page {{ page }} of {{ totalPages }}</span>
+  <button class="btn" type="button" [disabled]="page >= totalPages" (click)="load(page + 1)">Next</button>
+</div>

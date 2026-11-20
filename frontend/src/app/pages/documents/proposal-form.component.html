@@ -1,0 +1,147 @@
+@if (step === 'Company') {
+  <h2>Your company</h2>
+  <div class="q-grid">
+    <label>Role
+      <select [ngModel]="data.partyRole" (ngModelChange)="patch('partyRole', $event)">
+        <option value="Contractor">Contractor</option>
+        <option value="Architecture">Architecture</option>
+      </select>
+    </label>
+    <label>Company name <input [ngModel]="data.companyName" (ngModelChange)="patch('companyName', $event)" /></label>
+    <label>Contact name <input [ngModel]="data.companyContact" (ngModelChange)="patch('companyContact', $event)" /></label>
+    <label>Phone <input [ngModel]="data.companyPhone" (ngModelChange)="patch('companyPhone', $event)" /></label>
+    <label>Email <input type="email" [ngModel]="data.companyEmail" (ngModelChange)="patch('companyEmail', $event)" /></label>
+    <label>Website <input [ngModel]="data.companyWebsite" (ngModelChange)="patch('companyWebsite', $event)" /></label>
+    <label>License number <input [ngModel]="data.licenseNumber" (ngModelChange)="patch('licenseNumber', $event)" /></label>
+  </div>
+  <label>Address <textarea [ngModel]="data.companyAddress" (ngModelChange)="patch('companyAddress', $event)"></textarea></label>
+  <label>Insurance / bond info <textarea [ngModel]="data.insuranceInfo" (ngModelChange)="patch('insuranceInfo', $event)"></textarea></label>
+}
+
+@if (step === 'Client') {
+  <h2>Client / owner</h2>
+  <div class="q-grid">
+    <label>Company / owner name <input [ngModel]="data.clientCompany" (ngModelChange)="patch('clientCompany', $event)" /></label>
+    <label>Contact name <input [ngModel]="data.clientContact" (ngModelChange)="patch('clientContact', $event)" /></label>
+    <label>Phone <input [ngModel]="data.clientPhone" (ngModelChange)="patch('clientPhone', $event)" /></label>
+    <label>Email <input type="email" [ngModel]="data.clientEmail" (ngModelChange)="patch('clientEmail', $event)" /></label>
+  </div>
+  <label>Billing address <textarea [ngModel]="data.clientBillingAddress" (ngModelChange)="patch('clientBillingAddress', $event)"></textarea></label>
+  <label>Site address (if different) <textarea [ngModel]="data.clientSiteAddress" (ngModelChange)="patch('clientSiteAddress', $event)"></textarea></label>
+}
+
+@if (step === 'Project') {
+  <h2>Project details</h2>
+  <div class="q-grid">
+    <label>Proposal number <input [ngModel]="data.proposalNumber" (ngModelChange)="patch('proposalNumber', $event)" /></label>
+    <label>Proposal date <input type="date" [ngModel]="data.proposalDate" (ngModelChange)="patch('proposalDate', $event)" /></label>
+    <label>Valid until <input type="date" [ngModel]="data.validUntil" (ngModelChange)="patch('validUntil', $event)" /></label>
+    <label>Project type
+      <select [ngModel]="data.projectType" (ngModelChange)="patch('projectType', $event)">
+        <option value="New construction">New construction</option>
+        <option value="Addition">Addition</option>
+        <option value="Renovation / remodel">Renovation / remodel</option>
+        <option value="Commercial">Commercial</option>
+        <option value="Other">Other</option>
+      </select>
+    </label>
+    <label>Project name <input [ngModel]="data.projectName" (ngModelChange)="patch('projectName', $event)" /></label>
+    <label>Estimated start <input type="date" [ngModel]="data.estimatedStart" (ngModelChange)="patch('estimatedStart', $event)" /></label>
+    <label>Estimated finish <input type="date" [ngModel]="data.estimatedFinish" (ngModelChange)="patch('estimatedFinish', $event)" /></label>
+  </div>
+  <label>Job / site location <textarea [ngModel]="data.jobLocation" (ngModelChange)="patch('jobLocation', $event)"></textarea></label>
+  <label>Project summary <textarea [ngModel]="data.projectSummary" (ngModelChange)="patch('projectSummary', $event)"></textarea></label>
+}
+
+@if (step === 'Scope') {
+  <div class="row-head">
+    <h2>Scope of work</h2>
+    <button type="button" class="q-ghost" (click)="addScope()">+ Add item</button>
+  </div>
+  @for (item of data.scopeItems; track item.id; let i = $index) {
+    <div class="mini-card">
+      <div class="row-head tight">
+        <p class="lbl">Item {{ i + 1 }}</p>
+        <button type="button" class="q-danger" (click)="removeList('scopeItems', item.id)">Remove</button>
+      </div>
+      <input placeholder="Title" [ngModel]="item.title" (ngModelChange)="patchList('scopeItems', item.id, { title: $event })" />
+      <textarea placeholder="Description" [ngModel]="item.description" (ngModelChange)="patchList('scopeItems', item.id, { description: $event })"></textarea>
+    </div>
+  }
+  <label>Exclusions (not included) <textarea [ngModel]="data.exclusions" (ngModelChange)="patch('exclusions', $event)"></textarea></label>
+  <label>Materials / specs notes <textarea [ngModel]="data.materialsNotes" (ngModelChange)="patch('materialsNotes', $event)"></textarea></label>
+  <label>Assumptions <textarea [ngModel]="data.assumptions" (ngModelChange)="patch('assumptions', $event)"></textarea></label>
+}
+
+@if (step === 'Costs') {
+  <div class="row-head">
+    <h2>Cost breakdown</h2>
+    <button type="button" class="q-ghost" (click)="addCost()">+ Add item</button>
+  </div>
+  @for (item of data.costItems; track item.id) {
+    <div class="cost-row">
+      <input placeholder="Work name" [ngModel]="item.name" (ngModelChange)="patchList('costItems', item.id, { name: $event })" />
+      <input placeholder="Unit" [ngModel]="item.unit" (ngModelChange)="patchList('costItems', item.id, { unit: $event })" />
+      <input placeholder="Area" [ngModel]="item.area" (ngModelChange)="patchList('costItems', item.id, { area: $event })" />
+      <input type="number" min="0" step="0.01" placeholder="Price" [ngModel]="item.price" (ngModelChange)="patchList('costItems', item.id, { price: num($event) })" />
+      <div class="cost-total">
+        <button type="button" class="q-danger" (click)="removeList('costItems', item.id)">✕</button>
+      </div>
+    </div>
+  }
+  <div class="q-grid">
+    <label>Discount (₹) <input type="number" min="0" step="0.01" [ngModel]="data.discount" (ngModelChange)="patch('discount', num($event))" /></label>
+    <label>Tax rate (%) <input type="number" min="0" step="0.01" [ngModel]="data.taxRate" (ngModelChange)="patch('taxRate', num($event))" /></label>
+  </div>
+  <div class="sum-box">
+    <div><span>Items total</span><span>{{ formatCurrency(totals.itemsTotal) }}</span></div>
+    <div><span>Discount</span><span>- {{ formatCurrency(totals.discount) }}</span></div>
+    <div><span>Subtotal</span><span>{{ formatCurrency(totals.subtotal) }}</span></div>
+    <div><span>Tax ({{ data.taxRate || 0 }}%)</span><span>{{ formatCurrency(totals.tax) }}</span></div>
+    <div class="grand"><span>Grand total</span><span>{{ formatCurrency(totals.grandTotal) }}</span></div>
+  </div>
+}
+
+@if (step === 'Schedule') {
+  <h2>Timeline &amp; payments</h2>
+  <div class="row-head tight">
+    <h3>Milestones</h3>
+    <button type="button" class="q-ghost" (click)="addMilestone()">+ Add milestone</button>
+  </div>
+  @for (item of data.milestones; track item.id) {
+    <div class="mile-row">
+      <input placeholder="Milestone name" [ngModel]="item.name" (ngModelChange)="patchList('milestones', item.id, { name: $event })" />
+      <input type="date" [ngModel]="item.date" (ngModelChange)="patchList('milestones', item.id, { date: $event })" />
+      <div class="flex-gap">
+        <input placeholder="Notes" [ngModel]="item.notes" (ngModelChange)="patchList('milestones', item.id, { notes: $event })" />
+        <button type="button" class="q-danger" (click)="removeList('milestones', item.id)">✕</button>
+      </div>
+    </div>
+  }
+  <label>Payment terms <textarea [ngModel]="data.paymentTerms" (ngModelChange)="patch('paymentTerms', $event)"></textarea></label>
+  <div class="row-head tight">
+    <h3>Payment schedule</h3>
+    <button type="button" class="q-ghost" (click)="addPay()">+ Add payment</button>
+  </div>
+  @for (item of data.paymentMilestones; track item.id) {
+    <div class="pay-row">
+      <input placeholder="Label" [ngModel]="item.label" (ngModelChange)="patchList('paymentMilestones', item.id, { label: $event })" />
+      <input type="number" min="0" step="0.01" placeholder="%" [ngModel]="item.percent" (ngModelChange)="patchList('paymentMilestones', item.id, { percent: num($event) })" />
+      <input placeholder="Due when" [ngModel]="item.dueTrigger" (ngModelChange)="patchList('paymentMilestones', item.id, { dueTrigger: $event })" />
+      <button type="button" class="q-danger" (click)="removeList('paymentMilestones', item.id)">Remove</button>
+    </div>
+  }
+}
+
+@if (step === 'Terms') {
+  <h2>Terms &amp; acceptance</h2>
+  <label>Agreement terms <textarea [ngModel]="data.agreementTerms" (ngModelChange)="patch('agreementTerms', $event)"></textarea></label>
+  <label>Warranty <textarea [ngModel]="data.warranty" (ngModelChange)="patch('warranty', $event)"></textarea></label>
+  <label>Change-order policy <textarea [ngModel]="data.changeOrderPolicy" (ngModelChange)="patch('changeOrderPolicy', $event)"></textarea></label>
+  <div class="q-grid">
+    <label>Client signatory name <input [ngModel]="data.clientSignName" (ngModelChange)="patch('clientSignName', $event)" /></label>
+    <label>Client signature date <input type="date" [ngModel]="data.clientSignDate" (ngModelChange)="patch('clientSignDate', $event)" /></label>
+    <label>{{ data.partyRole }} signatory name <input [ngModel]="data.contractorSignName" (ngModelChange)="patch('contractorSignName', $event)" /></label>
+    <label>{{ data.partyRole }} signature date <input type="date" [ngModel]="data.contractorSignDate" (ngModelChange)="patch('contractorSignDate', $event)" /></label>
+  </div>
+}

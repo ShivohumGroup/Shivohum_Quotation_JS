@@ -1,0 +1,29 @@
+.import-card {
+  max-width: 760px;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.file-label input {
+  margin-top: 0.4rem;
+}
+
+.result {
+  background: #eef7f0;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+@media (max-width: 640px) {
+  .import-card {
+    max-width: none;
+  }
+
+  .import-card .btn {
+    width: 100%;
+  }
+
+  .file-label input {
+    width: 100%;
+  }
+}

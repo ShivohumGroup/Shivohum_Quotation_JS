@@ -1,0 +1,167 @@
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Dashboard</p>
+    <h1>Business income &amp; expense</h1>
+    <p class="muted">Project profit, monthly totals, and category spend for the selected period.</p>
+  </div>
+  <div class="actions">
+    <a routerLink="/transactions/new" class="btn primary hide-on-mobile">Add transaction</a>
+    <a routerLink="/import" class="btn">Import Excel</a>
+  </div>
+</section>
+
+<div class="range-bar card">
+  <div class="preset-row">
+    <button type="button" class="btn" [class.primary]="preset === 'thisMonth'" (click)="setPreset('thisMonth')">This month</button>
+    <button type="button" class="btn" [class.primary]="preset === 'thisYear'" (click)="setPreset('thisYear')">This year</button>
+    <button type="button" class="btn" [class.primary]="preset === 'custom'" (click)="setPreset('custom')">Custom</button>
+  </div>
+  @if (preset === 'custom') {
+    <div class="custom-range">
+      <label>From <input type="date" [(ngModel)]="customFrom" /></label>
+      <label>To <input type="date" [(ngModel)]="customTo" /></label>
+      <button type="button" class="btn primary" (click)="load()">Apply</button>
+    </div>
+  }
+</div>
+
+@if (error) {
+  <p class="error">{{ error }}</p>
+}
+
+<div class="stat-grid">
+  <article class="stat income">
+    <span>Total income</span>
+    <strong>{{ data.summary.totalIncome | currency:'INR':'symbol':'1.2-2' }}</strong>
+  </article>
+  <article class="stat expense">
+    <span>Total expense</span>
+    <strong>{{ data.summary.totalExpense | currency:'INR':'symbol':'1.2-2' }}</strong>
+  </article>
+  <article class="stat net">
+    <span>Net balance</span>
+    <strong>{{ data.summary.netBalance | currency:'INR':'symbol':'1.2-2' }}</strong>
+  </article>
+  <article class="stat month">
+    <span>This month balance</span>
+    <strong>{{ data.summary.thisMonthBalance | currency:'INR':'symbol':'1.2-2' }}</strong>
+  </article>
+</div>
+
+@if (loading) {
+  <p class="muted">Loading dashboard…</p>
+}
+
+<div class="two-col">
+  <section class="card">
+    <div class="card-head">
+      <h2>Project summary</h2>
+      <a routerLink="/projects">Manage</a>
+    </div>
+    <p class="muted table-note">Budget, received, due, and profit are all-time for each site. Site expense is also all-time.</p>
+    <div class="table-wrap">
+      <table class="stack-on-mobile">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th class="num">Budget</th>
+            <th class="num">Received</th>
+            <th class="num">Due</th>
+            <th class="num">Expense</th>
+            <th class="num">Profit</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of data.projects; track row.projectName) {
+            <tr>
+              <td data-label="Project">
+                @if (row.projectId) {
+                  <a [routerLink]="['/projects', row.projectId]">{{ row.projectName }}</a>
+                } @else {
+                  {{ row.projectName }}
+                }
+              </td>
+              <td class="num" data-label="Budget">
+                {{ row.contractAmount != null ? (row.contractAmount | currency:'INR':'symbol':'1.2-2') : '—' }}
+              </td>
+              <td class="num income-text" data-label="Received">{{ row.receivedAmount | currency:'INR':'symbol':'1.2-2' }}</td>
+              <td class="num" data-label="Due" [class.expense-text]="(row.dueAmount ?? 0) > 0">
+                {{ row.dueAmount != null ? (row.dueAmount | currency:'INR':'symbol':'1.2-2') : '—' }}
+              </td>
+              <td class="num expense-text" data-label="Expense">{{ row.expense | currency:'INR':'symbol':'1.2-2' }}</td>
+              <td class="num" data-label="Profit" [class.income-text]="row.profit >= 0" [class.expense-text]="row.profit < 0">
+                {{ row.profit | currency:'INR':'symbol':'1.2-2' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Monthly summary</h2>
+    <div class="table-wrap">
+      <table class="stack-on-mobile">
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th class="num">Income</th>
+            <th class="num">Expense</th>
+            <th class="num">Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of data.months; track row.label) {
+            <tr>
+              <td data-label="Month">{{ row.label }}</td>
+              <td class="num" data-label="Income">{{ row.income | currency:'INR':'symbol':'1.2-2' }}</td>
+              <td class="num" data-label="Expense">{{ row.expense | currency:'INR':'symbol':'1.2-2' }}</td>
+              <td class="num" data-label="Balance" [class.income-text]="row.balance >= 0" [class.expense-text]="row.balance < 0">
+                {{ row.balance | currency:'INR':'symbol':'1.2-2' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<div class="two-col">
+  <section class="card">
+    <h2>Expense by category</h2>
+    <div class="table-wrap">
+      <table class="stack-on-mobile">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th class="num">Expense</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of data.categories; track row.categoryId) {
+            <tr>
+              <td data-label="Category">{{ row.categoryName }}</td>
+              <td class="num expense-text" data-label="Expense">{{ row.expense | currency:'INR':'symbol':'1.2-2' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Expense distribution</h2>
+    <div class="chart-box">
+      <canvas #pieCanvas></canvas>
+    </div>
+  </section>
+</div>
+
+<section class="card">
+  <h2>Monthly income vs expense</h2>
+  <div class="chart-box line">
+    <canvas #lineCanvas></canvas>
+  </div>
+</section>

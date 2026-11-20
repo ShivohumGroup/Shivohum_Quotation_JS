@@ -1,0 +1,218 @@
+<div class="proposal-sheet" #sheet>
+  <div class="sheet-inner">
+    <div class="watermark" data-pdf-watermark>
+      <img src="/logo-dark.png" alt="" />
+    </div>
+
+    <header class="sheet-header" data-pdf-block>
+      <img src="/logo-dark.png" alt="Shivohum Group" class="sheet-logo" />
+      <div class="sheet-meta">
+        <p class="sheet-kicker">CONSTRUCTION PROPOSAL</p>
+        <p>No. {{ data.proposalNumber || '—' }}</p>
+        <p>Date: {{ formatDate(data.proposalDate) }}</p>
+        <p>Valid until: {{ formatDate(data.validUntil) }}</p>
+      </div>
+    </header>
+
+    <section class="sheet-section" data-pdf-block>
+      <h3>PROJECT</h3>
+      <div class="meta-grid">
+        <div>
+          <p class="lbl">Project name</p>
+          <p>{{ data.projectName || '—' }}</p>
+        </div>
+        <div>
+          <p class="lbl">Project type</p>
+          <p>{{ data.projectType }}</p>
+        </div>
+        <div class="wide">
+          <p class="lbl">Job location</p>
+          <p class="pre">{{ data.jobLocation || '—' }}</p>
+        </div>
+        <div>
+          <p class="lbl">Estimated start</p>
+          <p>{{ formatDate(data.estimatedStart) }}</p>
+        </div>
+        <div>
+          <p class="lbl">Estimated finish</p>
+          <p>{{ formatDate(data.estimatedFinish) }}</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="party-row" data-pdf-block>
+      <article class="party-card">
+        <p class="lbl">{{ data.partyRole }}</p>
+        <p class="strong">{{ data.companyName || '—' }}</p>
+        @if (data.companyContact) { <p>{{ data.companyContact }}</p> }
+        @if (data.companyAddress) { <p class="pre muted">{{ data.companyAddress }}</p> }
+        @if (data.companyPhone) { <p class="muted">{{ data.companyPhone }}</p> }
+        @if (data.companyEmail) { <p class="muted">{{ data.companyEmail }}</p> }
+        @if (data.companyWebsite) { <p class="muted">Web: {{ data.companyWebsite }}</p> }
+        @if (data.licenseNumber) { <p class="muted">License: {{ data.licenseNumber }}</p> }
+        @if (data.insuranceInfo) { <p class="muted">Insurance: {{ data.insuranceInfo }}</p> }
+      </article>
+      <article class="party-card">
+        <p class="lbl">Client / Owner</p>
+        <p class="strong">{{ data.clientCompany || '—' }}</p>
+        @if (data.clientContact) { <p>{{ data.clientContact }}</p> }
+        @if (data.clientBillingAddress) { <p class="pre muted">{{ data.clientBillingAddress }}</p> }
+        @if (data.clientPhone) { <p class="muted">{{ data.clientPhone }}</p> }
+        @if (data.clientEmail) { <p class="muted">{{ data.clientEmail }}</p> }
+        @if (data.clientSiteAddress) { <p class="muted">Site: {{ data.clientSiteAddress }}</p> }
+      </article>
+    </div>
+
+    @if (data.projectSummary) {
+      <section class="sheet-section" data-pdf-block>
+        <h3>PROJECT SUMMARY</h3>
+        <p class="pre">{{ data.projectSummary }}</p>
+      </section>
+    }
+
+    <section class="sheet-section" data-pdf-block>
+      <h3>SCOPE OF WORK</h3>
+      <ol class="scope-list">
+        @for (item of filledScope; track item.id; let i = $index) {
+          <li>
+            <p class="strong">{{ i + 1 }}. {{ item.title || 'Untitled' }}</p>
+            @if (item.description) { <p class="pre">{{ item.description }}</p> }
+          </li>
+        }
+      </ol>
+    </section>
+
+    @if (data.exclusions || data.materialsNotes || data.assumptions) {
+      <div class="notes-stack">
+        @if (data.exclusions) {
+          <div data-pdf-block>
+            <p class="lbl">Exclusions</p>
+            <p class="pre">{{ data.exclusions }}</p>
+          </div>
+        }
+        @if (data.materialsNotes) {
+          <div data-pdf-block>
+            <p class="lbl">Materials / specs</p>
+            <p class="pre">{{ data.materialsNotes }}</p>
+          </div>
+        }
+        @if (data.assumptions) {
+          <div data-pdf-block>
+            <p class="lbl">Assumptions</p>
+            <p class="pre">{{ data.assumptions }}</p>
+          </div>
+        }
+      </div>
+    }
+
+    <section class="sheet-section" data-pdf-block>
+      <h3>TIMELINE MILESTONES</h3>
+      <table>
+        <thead>
+          <tr><th>Milestone</th><th>Date</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          @for (m of filledMilestones; track m.id) {
+            <tr>
+              <td>{{ m.name || '—' }}</td>
+              <td>{{ formatDate(m.date) }}</td>
+              <td>{{ m.notes || '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <div data-pdf-block class="sheet-section">
+      <h3>COST BREAKDOWN</h3>
+      @if (!filledCosts.length) {
+        <p class="empty">No items</p>
+      } @else {
+        <table class="cost-table">
+          <thead>
+            <tr>
+              <th>Work name</th>
+              <th class="num">Unit</th>
+              <th class="num">Area</th>
+              <th class="num">Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (i of filledCosts; track i.id) {
+              <tr>
+                <td>{{ i.name || '—' }}</td>
+                <td class="num">{{ i.unit || '—' }}</td>
+                <td class="num">{{ i.area || '—' }}</td>
+                <td class="num">{{ formatCurrency(i.price) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <div class="totals" data-pdf-block>
+      <div class="tot"><span>Items total</span><span>{{ formatCurrency(totals.itemsTotal) }}</span></div>
+      <div class="tot"><span>Discount</span><span>- {{ formatCurrency(totals.discount) }}</span></div>
+      <div class="tot"><span>Subtotal</span><span>{{ formatCurrency(totals.subtotal) }}</span></div>
+      <div class="tot"><span>Tax ({{ data.taxRate || 0 }}%)</span><span>{{ formatCurrency(totals.tax) }}</span></div>
+      <div class="tot grand"><span>Grand total</span><span>{{ formatCurrency(totals.grandTotal) }}</span></div>
+    </div>
+
+    <div data-pdf-block class="sheet-section">
+      <h3>PAYMENT SCHEDULE</h3>
+      @if (data.paymentTerms) {
+        <p class="pre">{{ data.paymentTerms }}</p>
+      }
+      <table>
+        <thead>
+          <tr><th>Payment</th><th>%</th><th>Amount</th><th>Due</th></tr>
+        </thead>
+        <tbody>
+          @for (p of filledPayments; track p.id) {
+            <tr>
+              <td>{{ p.label || '—' }}</td>
+              <td>{{ p.percent }}%</td>
+              <td>{{ formatCurrency((totals.grandTotal * (p.percent || 0)) / 100) }}</td>
+              <td>{{ p.dueTrigger || '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div data-pdf-block class="sheet-section">
+      <h3>TERMS &amp; ACCEPTANCE</h3>
+      @if (data.agreementTerms) {
+        <p class="lbl">Agreement</p>
+        <p class="pre">{{ data.agreementTerms }}</p>
+      }
+      @if (data.warranty) {
+        <p class="lbl">Warranty</p>
+        <p class="pre">{{ data.warranty }}</p>
+      }
+      @if (data.changeOrderPolicy) {
+        <p class="lbl">Change orders</p>
+        <p class="pre">{{ data.changeOrderPolicy }}</p>
+      }
+      <p class="fine">This proposal may be withdrawn if not accepted by {{ formatDate(data.validUntil) }}.</p>
+    </div>
+
+    <div class="signs" data-pdf-block>
+      <div>
+        <p class="lbl">Authorized client</p>
+        <div class="sign-line"></div>
+        <p class="strong">{{ data.clientSignName || 'Signature' }}</p>
+        <p class="fine">Date: {{ formatDate(data.clientSignDate) }}</p>
+      </div>
+      <div>
+        <p class="lbl">{{ data.partyRole }}</p>
+        <div class="sign-line"></div>
+        <p class="strong">{{ data.contractorSignName || 'Signature' }}</p>
+        <p class="fine">Date: {{ formatDate(data.contractorSignDate) }}</p>
+      </div>
+    </div>
+
+    <footer class="sheet-foot" data-pdf-block>Shivohum Group — Construction Proposal</footer>
+  </div>
+</div>

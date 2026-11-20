@@ -1,0 +1,45 @@
+@if (step === 'Details') {
+  <h2>Invoice details</h2>
+  <div class="q-grid">
+    <label>Invoice number <input [ngModel]="data.invoiceNumber" (ngModelChange)="patch('invoiceNumber', $event)" /></label>
+    <label>Invoice date <input type="date" [ngModel]="data.invoiceDate" (ngModelChange)="patch('invoiceDate', $event)" /></label>
+    <label>Bill to <input placeholder="Client name" [ngModel]="data.billTo" (ngModelChange)="patch('billTo', $event)" /></label>
+  </div>
+  <h3>Company header</h3>
+  <div class="q-grid">
+    <label>Company name <input [ngModel]="data.companyName" (ngModelChange)="patch('companyName', $event)" /></label>
+    <label>Address <input [ngModel]="data.companyAddress" (ngModelChange)="patch('companyAddress', $event)" /></label>
+    <label>Phones <input [ngModel]="data.companyPhones" (ngModelChange)="patch('companyPhones', $event)" /></label>
+    <label>Email <input type="email" [ngModel]="data.companyEmail" (ngModelChange)="patch('companyEmail', $event)" /></label>
+  </div>
+}
+
+@if (step === 'Amounts') {
+  <h2>Amounts</h2>
+  <div class="q-grid">
+    <label>Total project amount (₹) <input type="number" min="0" step="0.01" [ngModel]="data.totalProjectAmount" (ngModelChange)="patch('totalProjectAmount', num($event))" /></label>
+    <label>Previous payment (₹) <input type="number" min="0" step="0.01" [ngModel]="data.previousPayment" (ngModelChange)="patch('previousPayment', num($event))" /></label>
+    <label>Payment request (₹) <input type="number" min="0" step="0.01" [ngModel]="data.paymentRequest" (ngModelChange)="patch('paymentRequest', num($event))" /></label>
+  </div>
+  <div class="sum-box">
+    <div><span>Total project amount</span><span>₹{{ formatAmount(totals.total) }}</span></div>
+    <div><span>Previous payment</span><span>₹{{ formatAmount(totals.previous) }}</span></div>
+    <div class="grand"><span>Payment request</span><span>₹{{ formatAmount(totals.request) }}</span></div>
+    <div class="grand"><span>Remaining balance</span><span>₹{{ formatAmount(totals.remaining) }}</span></div>
+    <p class="words">Amount in words: {{ totals.amountInWords }}</p>
+  </div>
+}
+
+@if (step === 'Terms') {
+  <h2>Terms &amp; footer</h2>
+  <label>Payment terms (one per line)
+    <textarea [ngModel]="termsText" (ngModelChange)="setTerms($event)"></textarea>
+  </label>
+  <label>Thank you line <input [ngModel]="data.thankYouLine" (ngModelChange)="patch('thankYouLine', $event)" /></label>
+  <label>Trust line <input [ngModel]="data.trustLine" (ngModelChange)="patch('trustLine', $event)" /></label>
+}
+
+@if (step === 'Preview') {
+  <h2>Ready to export</h2>
+  <p class="hint">Review the invoice on the right. When it looks correct, click Download PDF.</p>
+}

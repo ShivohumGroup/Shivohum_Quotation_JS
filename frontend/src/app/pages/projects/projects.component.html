@@ -1,0 +1,80 @@
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Sites</p>
+    <h1>Projects</h1>
+    <p class="muted">Client budget, received payments, and site spend for each construction site.</p>
+  </div>
+</section>
+
+<div class="two-col">
+  <section class="card">
+    <h2>Existing projects</h2>
+    <div class="table-wrap">
+    <table class="stack-on-mobile">
+      <thead>
+        <tr>
+          <th>Project</th>
+          <th>Client</th>
+          <th class="num">Budget</th>
+          <th class="num">Received</th>
+          <th class="num">Due</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (project of projects; track project.projectId) {
+          <tr [class.editing]="editingId === project.projectId">
+            <td data-label="Project">{{ project.projectName }}</td>
+            <td data-label="Client">{{ project.clientName || '—' }}</td>
+            <td class="num" data-label="Budget">
+              {{ project.contractAmount != null ? (project.contractAmount | currency:'INR':'symbol':'1.2-2') : '—' }}
+            </td>
+            <td class="num income-text" data-label="Received">{{ project.receivedAmount | currency:'INR':'symbol':'1.2-2' }}</td>
+            <td class="num" data-label="Due" [class.expense-text]="(project.dueAmount ?? 0) > 0">
+              {{ project.dueAmount != null ? (project.dueAmount | currency:'INR':'symbol':'1.2-2') : '—' }}
+            </td>
+            <td data-label="Status">
+              <span class="pill" [class.active]="project.status === 'Active'" [class.hold]="project.status === 'OnHold'" [class.done]="project.status === 'Completed'">
+                {{ project.status === 'OnHold' ? 'On hold' : project.status }}
+              </span>
+            </td>
+            <td class="row-actions" data-label="Actions">
+              <button type="button" class="link-btn edit" (click)="edit(project)">Edit</button>
+              <a [routerLink]="['/projects', project.projectId]">Payments</a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <form class="card form-stack" [formGroup]="form" (ngSubmit)="submit()">
+    <h2>{{ isEdit ? 'Edit project' : 'Add project' }}</h2>
+    <label>Project name <input formControlName="projectName" placeholder="AMARBHAI'S HOUSE" /></label>
+    <label>Client name <input formControlName="clientName" /></label>
+    <label>Client budget (₹) <input type="number" min="0" step="0.01" formControlName="contractAmount" placeholder="Agreed project amount" /></label>
+    <label>
+      Status
+      <select formControlName="status">
+        <option value="Active">Active</option>
+        <option value="OnHold">On hold</option>
+        <option value="Completed">Completed</option>
+      </select>
+    </label>
+    <label>Start date <input type="date" formControlName="startDate" /></label>
+    <label>Notes <input formControlName="notes" /></label>
+    @if (error) {
+      <p class="error">{{ error }}</p>
+    }
+    <div class="form-actions">
+      <button class="btn primary" type="submit" [disabled]="saving">
+        {{ saving ? 'Saving…' : (isEdit ? 'Save changes' : 'Save project') }}
+      </button>
+      @if (isEdit) {
+        <button class="btn" type="button" (click)="cancelEdit()">Cancel</button>
+      }
+    </div>
+  </form>
+</div>

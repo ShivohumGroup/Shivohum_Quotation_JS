@@ -1,0 +1,46 @@
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Migration</p>
+    <h1>Import Excel</h1>
+    <p class="muted">Load the existing Income_Expense_Business_Tracker sheet so history is not typed again.</p>
+  </div>
+</section>
+
+<section class="card import-card">
+  <h2>Expected columns</h2>
+  <p>Date, Type, Category, Description, Client / Project, Payment Mode, Amount, Notes. The Month column is ignored and calculated from Date.</p>
+  <p>If a project or category is new, it is created automatically. Notes such as “Shivohum Account” are matched to funds.</p>
+
+  <label class="file-label">
+    Excel file (.xlsx)
+    <input type="file" accept=".xlsx" (change)="onFile($event)" />
+  </label>
+
+  @if (file) {
+    <p>Selected: <strong>{{ file.name }}</strong></p>
+  }
+
+  @if (error) {
+    <p class="error">{{ error }}</p>
+  }
+
+  <div class="actions">
+    <button class="btn primary" type="button" [disabled]="loading" (click)="upload()">
+      {{ loading ? 'Importing…' : 'Import now' }}
+    </button>
+    <a routerLink="/transactions" class="btn">Go to transactions</a>
+  </div>
+
+  @if (result) {
+    <div class="result">
+      <p><strong>{{ result.importedCount }}</strong> rows imported, <strong>{{ result.skippedCount }}</strong> skipped.</p>
+      @if (result.errors.length) {
+        <ul>
+          @for (item of result.errors; track item) {
+            <li>{{ item }}</li>
+          }
+        </ul>
+      }
+    </div>
+  }
+</section>

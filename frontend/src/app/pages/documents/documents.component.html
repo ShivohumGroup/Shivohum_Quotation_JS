@@ -1,0 +1,168 @@
+<div class="quote-app">
+  <div class="quote-top">
+    <p class="brand-kicker">Shivohum Group</p>
+    <div class="mode-toggle">
+      <button type="button" [class.on]="mode === 'quotation'" (click)="setMode('quotation')">Quotation</button>
+      <button type="button" [class.on]="mode === 'invoice'" (click)="setMode('invoice')">Invoice</button>
+    </div>
+  </div>
+
+  <div class="saved-bar">
+    <label>
+      Link project
+      <select [ngModel]="projectId" (ngModelChange)="onProjectChange($event)">
+        <option [ngValue]="null">No project</option>
+        @for (project of projects; track project.projectId) {
+          <option [ngValue]="project.projectId">{{ project.projectName }}</option>
+        }
+      </select>
+    </label>
+    <button type="button" class="q-btn" [disabled]="saving" (click)="save()">
+      {{ saving ? 'Saving…' : (documentId ? 'Save changes' : 'Save to database') }}
+    </button>
+    <button type="button" class="q-ghost" (click)="newDoc()">New</button>
+    @if (dirty) { <span class="dirty-msg">Unsaved changes</span> }
+    @if (saveMsg) { <span class="save-msg" [class.err]="saveMsg.startsWith('Could')">{{ saveMsg }}</span> }
+  </div>
+
+  <div class="saved-panel">
+    <div class="saved-head">
+      <h2>{{ mode === 'quotation' ? 'Saved quotations' : 'Saved invoices' }}</h2>
+      <p>Open a row to edit. All fields are stored in the database.</p>
+    </div>
+    @if (!saved.length) {
+      <p class="saved-empty">No saved {{ mode === 'quotation' ? 'quotations' : 'invoices' }} yet. Fill the form and click Save to database.</p>
+    } @else {
+      <div class="saved-table-wrap">
+        <table class="saved-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Project</th>
+              <th>Last saved</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of saved; track item.documentId) {
+              <tr [class.on]="item.documentId === documentId">
+                <td>{{ item.title }}</td>
+                <td>{{ item.projectName || '—' }}</td>
+                <td>{{ formatListDate(item.updatedOn || item.createdOn) }}</td>
+                <td class="saved-actions">
+                  <button type="button" class="q-ghost" (click)="loadSaved(item.documentId)">Open</button>
+                  <button type="button" class="q-danger" [disabled]="deletingId === item.documentId" (click)="deleteSaved(item, $event)">
+                    {{ deletingId === item.documentId ? 'Deleting…' : 'Delete' }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  @if (mode === 'quotation') {
+    <div class="builder">
+      <header class="builder-head">
+        <div class="head-brand">
+          <img src="/logo-dark.png" alt="Shivohum Group" />
+          <div>
+            <p class="eyebrow">Construction proposal</p>
+            <h1>Build &amp; download</h1>
+            <p class="muted">Fill in your details, review the live proposal, then download a PDF for the client.</p>
+          </div>
+        </div>
+        @if (quotePreview) {
+          <button type="button" class="q-btn dark" [disabled]="downloading" (click)="downloadQuote()">
+            {{ downloading ? 'Preparing PDF…' : 'Download PDF' }}
+          </button>
+        }
+      </header>
+
+      <nav class="steps">
+        @for (name of quoteSteps; track name; let i = $index) {
+          <button type="button" class="step" [class.on]="i === quoteStep" [class.done]="i < quoteStep" (click)="quoteStep = i">
+            {{ i + 1 }}. {{ name }}
+          </button>
+        }
+      </nav>
+
+      <div class="split">
+        <section class="form-card">
+          @if (!quotePreview) {
+            <app-proposal-form [data]="proposal" [step]="quoteSteps[quoteStep]" (dataChange)="onProposalChange($event)" />
+          } @else {
+            <h2>Ready to export</h2>
+            <p class="muted">Review the proposal on the right. When it looks correct, click Download PDF.</p>
+            <button type="button" class="q-btn dark" [disabled]="downloading" (click)="downloadQuote()">
+              {{ downloading ? 'Preparing PDF…' : 'Download PDF' }}
+            </button>
+            <button type="button" class="linkish" (click)="resetQuote()">Reset form</button>
+          }
+          <div class="nav-row">
+            <button type="button" class="q-ghost" [disabled]="quoteStep === 0" (click)="quoteStep = quoteStep - 1">Back</button>
+            <button type="button" class="q-btn slate" [disabled]="quoteStep === quoteSteps.length - 1" (click)="quoteStep = quoteStep + 1">Next</button>
+          </div>
+        </section>
+        <section class="preview-pane">
+          <div class="preview-label"><span>Live preview</span><span>A4 layout</span></div>
+          <div class="preview-scroll">
+            <app-proposal-preview #quotePreviewCmp [data]="proposal" />
+          </div>
+        </section>
+      </div>
+    </div>
+  } @else {
+    <div class="builder">
+      <header class="builder-head">
+        <div class="head-brand">
+          <img src="/invoice-logo.png" alt="Shivohum Group" />
+          <div>
+            <p class="eyebrow">Invoice generator</p>
+            <h1>Build &amp; download</h1>
+            <p class="muted">Fill invoice details, preview the branded layout, then download a PDF.</p>
+          </div>
+        </div>
+        @if (invoicePreview) {
+          <button type="button" class="q-btn navy" [disabled]="downloading" (click)="downloadInvoice()">
+            {{ downloading ? 'Preparing PDF…' : 'Download PDF' }}
+          </button>
+        }
+      </header>
+
+      <nav class="steps">
+        @for (name of invoiceSteps; track name; let i = $index) {
+          <button type="button" class="step navy" [class.on]="i === invoiceStep" [class.done]="i < invoiceStep" (click)="invoiceStep = i">
+            {{ i + 1 }}. {{ name }}
+          </button>
+        }
+      </nav>
+
+      <div class="split">
+        <section class="form-card">
+          <app-invoice-form [data]="invoice" [step]="invoiceSteps[invoiceStep]" (dataChange)="onInvoiceChange($event)" />
+          @if (invoicePreview) {
+            <div class="export-actions">
+              <button type="button" class="q-btn navy" [disabled]="downloading" (click)="downloadInvoice()">
+                {{ downloading ? 'Preparing PDF…' : 'Download PDF' }}
+              </button>
+              <button type="button" class="linkish" (click)="resetInvoice()">Reset form</button>
+            </div>
+          }
+          <div class="nav-row">
+            <button type="button" class="q-ghost" [disabled]="invoiceStep === 0" (click)="invoiceStep = invoiceStep - 1">Back</button>
+            <button type="button" class="q-btn slate" [disabled]="invoiceStep === invoiceSteps.length - 1" (click)="invoiceStep = invoiceStep + 1">Next</button>
+          </div>
+        </section>
+        <section class="preview-pane">
+          <div class="preview-label"><span>Live preview</span><span>A4 layout</span></div>
+          <div class="preview-scroll">
+            <app-invoice-preview #invoicePreviewCmp [data]="invoice" />
+          </div>
+        </section>
+      </div>
+    </div>
+  }
+</div>

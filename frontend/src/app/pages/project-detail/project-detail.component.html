@@ -1,0 +1,108 @@
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Client payments</p>
+    <h1>{{ project?.projectName || 'Project' }}</h1>
+    <p class="muted">{{ project?.clientName || 'No client name' }} — record each amount received against the agreed budget.</p>
+  </div>
+  <a routerLink="/projects" class="btn">Back to projects</a>
+</section>
+
+@if (project) {
+  <div class="stat-grid">
+    <article class="stat">
+      <span>Client budget</span>
+      <strong>{{ project.contractAmount != null ? (project.contractAmount | currency:'INR':'symbol':'1.2-2') : 'Not set' }}</strong>
+    </article>
+    <article class="stat income">
+      <span>Received</span>
+      <strong>{{ project.receivedAmount | currency:'INR':'symbol':'1.2-2' }}</strong>
+    </article>
+    <article class="stat due">
+      <span>Balance due</span>
+      <strong>{{ project.dueAmount != null ? (project.dueAmount | currency:'INR':'symbol':'1.2-2') : '—' }}</strong>
+    </article>
+    <article class="stat expense">
+      <span>Site expense</span>
+      <strong>{{ project.expenseAmount | currency:'INR':'symbol':'1.2-2' }}</strong>
+    </article>
+    <article class="stat net">
+      <span>Profit (received − expense)</span>
+      <strong [class.income-text]="project.profitAmount >= 0" [class.expense-text]="project.profitAmount < 0">
+        {{ project.profitAmount | currency:'INR':'symbol':'1.2-2' }}
+      </strong>
+    </article>
+  </div>
+}
+
+<div class="two-col">
+  <section class="card">
+    <h2>Payment history</h2>
+    @if (!payments.length) {
+      <p class="muted">No client payments recorded yet.</p>
+    } @else {
+      <div class="table-wrap">
+        <table class="stack-on-mobile">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th class="num">Amount</th>
+              <th>Mode</th>
+              <th>Reference</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (payment of payments; track payment.clientPaymentId) {
+              <tr [class.editing]="editingPaymentId === payment.clientPaymentId">
+                <td data-label="Date">{{ payment.paymentDate | date:'dd-MM-yyyy' }}</td>
+                <td class="num income-text" data-label="Amount">{{ payment.amount | currency:'INR':'symbol':'1.2-2' }}</td>
+                <td data-label="Mode">{{ payment.paymentModeName }}{{ payment.accountName ? ' · ' + payment.accountName : '' }}</td>
+                <td data-label="Reference">{{ payment.referenceNo || payment.notes || '—' }}</td>
+                <td class="row-actions" data-label="Actions">
+                  <button type="button" class="link-btn edit" (click)="editPayment(payment)">Edit</button>
+                  <button type="button" class="link-btn danger" (click)="removePayment(payment)">Delete</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  <form class="card form-stack" [formGroup]="form" (ngSubmit)="submit()">
+    <h2>{{ isEditPayment ? 'Edit payment' : 'Add client payment' }}</h2>
+    <label>Date <input type="date" formControlName="paymentDate" /></label>
+    <label>Amount (₹) <input type="number" min="0.01" step="0.01" formControlName="amount" /></label>
+    <label>
+      Payment mode
+      <select formControlName="paymentModeId">
+        @for (mode of paymentModes; track mode.id) {
+          <option [value]="mode.id">{{ mode.name }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      Account / fund
+      <select formControlName="accountId">
+        <option value="">Not specified</option>
+        @for (account of accounts; track account.id) {
+          <option [value]="account.id">{{ account.name }}</option>
+        }
+      </select>
+    </label>
+    <label>Reference (UTR / cheque) <input formControlName="referenceNo" placeholder="Optional" /></label>
+    <label>Notes <input formControlName="notes" placeholder="Advance, 2nd running…" /></label>
+    @if (error) {
+      <p class="error">{{ error }}</p>
+    }
+    <div class="form-actions">
+      <button class="btn primary" type="submit" [disabled]="saving">
+        {{ saving ? 'Saving…' : (isEditPayment ? 'Save changes' : 'Save payment') }}
+      </button>
+      @if (isEditPayment) {
+        <button class="btn" type="button" (click)="cancelEdit()">Cancel</button>
+      }
+    </div>
+  </form>
+</div>
